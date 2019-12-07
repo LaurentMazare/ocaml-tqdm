@@ -2,7 +2,7 @@ type t
 
 module Style : sig
   type t =
-    | Default
+    | Utf
     | Ascii
 end
 
