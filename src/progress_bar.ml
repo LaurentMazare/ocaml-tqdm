@@ -1,4 +1,4 @@
-(* TODO: profile and optimize performance, currently we only get ~2M updates per second
+(* TODO: profile and optimize performance, currently we only get ~200k updates per second
    on a terminal width of ~120 on an i7-8565U. [Unix.gettimeofday] may be slow too.
 *)
 open Base

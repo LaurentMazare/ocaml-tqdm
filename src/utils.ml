@@ -9,9 +9,15 @@ let format_rate rate =
   match Float.classify rate with
   | Infinite | Nan | Zero -> "n/a"
   | Normal | Subnormal ->
-    if Float.( < ) rate 1.
+    if Float.( < ) rate 1e-3
+    then Printf.sprintf "s/%5.0fit" (1. /. rate)
+    else if Float.( < ) rate 1.
     then Printf.sprintf "s/%5.2fit" (1. /. rate)
-    else Printf.sprintf "%5.2fit/s" rate
+    else if Float.( < ) rate 1e3
+    then Printf.sprintf "%5.2fit/s" rate
+    else if Float.( < ) rate 1e5
+    then Printf.sprintf "%5.0fit/s" rate
+    else Printf.sprintf "%5.0fkit/s" (rate *. 1e-3)
 
 module Time = struct
   module Span = struct
