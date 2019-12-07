@@ -1,3 +1,6 @@
+(* TODO: profile and optimize performance, currently we only get ~2M updates per second
+   on a terminal width of ~120 on an i7-8565U. [Unix.gettimeofday] may be slow too.
+*)
 open Base
 
 module Style = struct
@@ -22,7 +25,6 @@ end
 
 type t =
   { options : Options.t
-  ; start_time : Utils.Time.t
   ; total_width : int
   ; buffer : Buffer.t
   ; total : int
@@ -30,9 +32,10 @@ type t =
   ; out_channel : Stdio.Out_channel.t
   ; file_descr : Unix.file_descr
   ; mutable current : int
+  ; mutable start_time : Utils.Time.t
   }
 
-let create ?(options = Options.default) ~total () =
+let create ?(options = Options.default) total =
   let total_width =
     match options.total_width with
     | Some total_width -> total_width
@@ -112,13 +115,15 @@ let update t v =
     Stdio.Out_channel.flush t.out_channel)
 
 let close t =
-  update t t.total;
   Stdio.Out_channel.output_char t.out_channel '\n';
   Stdio.Out_channel.flush t.out_channel
 
-let reset t = update t 0
+let reset t =
+  t.start_time <- Utils.Time.now ();
+  update t 0
+
 let incr t ~by = update t (t.current + by)
 
-let with_bar ?options ~total () ~f =
-  let t = create ?options ~total () in
+let with_bar ?options total ~f =
+  let t = create ?options total in
   Exn.protectx ~f t ~finally:close
