@@ -1,4 +1,3 @@
-val format_num : float -> string
 val format_rate : float -> string
 module Time : sig
   module Span : sig

@@ -1,5 +1,5 @@
-(* TODO: profile and optimize performance, currently we only get ~200k updates per second
-   on a terminal width of ~120 on an i7-8565U. [Unix.gettimeofday] may be slow too.
+(* TODO: profile and optimize performance, currently we only get ~250k updates per second
+   on a terminal width of ~120 on an i7-8565U.
 *)
 open Base
 
@@ -7,10 +7,20 @@ module Style = struct
   type t =
     | Utf
     | Ascii
+    | Line
+    | Circle
+    | Braille
+    | Braille_spin
+    | Vertical
 
   let bars = function
     | Utf -> [| " "; "▏"; "▎"; "▍"; "▌"; "▋"; "▊"; "▉"; "█" |]
     | Ascii -> [| " "; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "#" |]
+    | Line -> [| "─"; "─"; "─"; "╾"; "╾"; "╾"; "╾"; "━"; "═" |]
+    | Circle -> [| " "; "◓"; "◑"; "◒"; "◐"; "◓"; "◑"; "◒"; "#" |]
+    | Braille -> [| " "; "⡀"; "⡄"; "⡆"; "⡇"; "⡏"; "⡟"; "⡿"; "⣿" |]
+    | Braille_spin -> [| " "; "⠙"; "⠹"; "⠸"; "⠼"; "⠴"; "⠦"; "⠇"; "⠿" |]
+    | Vertical -> [| "▁"; "▂"; "▃"; "▄"; "▅"; "▆"; "▇"; "█"; "█" |]
 end
 
 module Options = struct
@@ -30,7 +40,7 @@ type t =
   ; total : int
   ; bars : string array
   ; out_channel : Stdio.Out_channel.t
-  ; file_descr : Unix.file_descr
+  ; isatty : bool
   ; mutable current : int
   ; mutable start_time : Utils.Time.t
   }
@@ -49,7 +59,7 @@ let create ?(options = Options.default) total =
   ; current = 0
   ; bars = Style.bars options.style
   ; out_channel = Stdio.stdout
-  ; file_descr = Unix.stdout
+  ; isatty = Unix.isatty Unix.stdout
   }
 
 let right_bar ~current ~total ~elapsed ~remaining ~rate =
@@ -86,7 +96,7 @@ let fill buffer ~options ~current ~total ~bars ~width ~elapsed:_ =
 let update t v =
   let v = Int.max 0 (Int.min v t.total) in
   t.current <- v;
-  if Unix.isatty t.file_descr
+  if t.isatty
   then (
     let elapsed = Utils.Time.(diff (now ()) t.start_time) in
     (* TODO: add EMA ? *)

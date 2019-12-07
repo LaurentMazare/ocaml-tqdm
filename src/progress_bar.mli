@@ -4,6 +4,11 @@ module Style : sig
   type t =
     | Utf
     | Ascii
+    | Line
+    | Circle
+    | Braille
+    | Braille_spin
+    | Vertical
 end
 
 module Options : sig

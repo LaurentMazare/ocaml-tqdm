@@ -1,10 +1,5 @@
 open Base
 
-let format_num f =
-  Printf.sprintf "%.3g" f
-  |> String.substr_replace_first ~pattern:"+0" ~with_:"+"
-  |> String.substr_replace_first ~pattern:"-0" ~with_:"-"
-
 let format_rate rate =
   match Float.classify rate with
   | Infinite | Nan | Zero -> "n/a"

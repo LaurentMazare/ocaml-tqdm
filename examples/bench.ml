@@ -1,6 +1,6 @@
 module T = Tqdm.Tqdm
 
-let niters = 1_000_000
+let niters = 10_000_000_000
 
 let () =
   T.with_bar niters ~f:(fun tqdm ->
