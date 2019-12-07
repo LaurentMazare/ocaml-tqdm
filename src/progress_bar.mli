@@ -9,7 +9,7 @@ end
 module Options : sig
   type t =
     { style : Style.t
-    ; width : int
+    ; total_width : int option (* When not set, use the terminal width *)
     ; prefix : string
     }
 

@@ -13,16 +13,17 @@ end
 module Options = struct
   type t =
     { style : Style.t
-    ; width : int
+    ; total_width : int option
     ; prefix : string
     }
 
-  let default = { style = Utf; width = 40; prefix = "" }
+  let default = { style = Utf; total_width = None; prefix = "" }
 end
 
 type t =
   { options : Options.t
   ; start_time : Utils.Time.t
+  ; total_width : int
   ; buffer : Buffer.t
   ; total : int
   ; bars : string array
@@ -32,9 +33,15 @@ type t =
   }
 
 let create ?(options = Options.default) ~total () =
+  let total_width =
+    match options.total_width with
+    | Some total_width -> total_width
+    | None -> Term_width.get () |> Option.value ~default:0
+  in
   { options
+  ; total_width
   ; start_time = Utils.Time.now ()
-  ; buffer = Buffer.create (options.width + 128)
+  ; buffer = Buffer.create (total_width + 1)
   ; total
   ; current = 0
   ; bars = Style.bars options.style
@@ -56,7 +63,6 @@ let left_bar ~current ~total =
   Printf.sprintf "\r%3.0f%%|" pct
 
 let fill buffer ~options ~current ~total ~bars ~width ~elapsed:_ =
-  Buffer.reset buffer;
   let current_f = Float.of_int current in
   let total_f = Float.of_int total in
   let bar_len = Array.length bars in
@@ -70,7 +76,7 @@ let fill buffer ~options ~current ~total ~bars ~width ~elapsed:_ =
   then (
     let i = Float.of_int bar_len *. (fills -. Float.of_int ifills) in
     Buffer.add_string buffer bars.(Int.of_float i));
-  for _i = 1 to options.width - ifills - 1 do
+  for _i = 1 to width - ifills - 1 do
     Buffer.add_string buffer bars.(0)
   done
 
@@ -89,14 +95,18 @@ let update t v =
     let right_bar =
       right_bar ~current:t.current ~total:t.total ~elapsed ~remaining ~rate
     in
-    fill
-      t.buffer
-      ~options:t.options
-      ~current:t.current
-      ~total:t.total
-      ~width:t.options.width
-      ~bars:t.bars
-      ~elapsed:Utils.Time.(diff (now ()) t.start_time);
+    let width = t.total_width - String.length left_bar - String.length right_bar in
+    Buffer.reset t.buffer;
+    if width > 0
+    then
+      fill
+        t.buffer
+        ~options:t.options
+        ~current:t.current
+        ~total:t.total
+        ~width
+        ~bars:t.bars
+        ~elapsed;
     let bar = left_bar ^ Buffer.contents t.buffer ^ right_bar in
     Stdio.Out_channel.output_string t.out_channel bar;
     Stdio.Out_channel.flush t.out_channel)

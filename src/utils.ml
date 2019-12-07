@@ -27,8 +27,8 @@ module Time = struct
       let minutes, seconds = divmod seconds 60 in
       let hours, minutes = divmod minutes 60 in
       if hours <> 0
-      then Printf.sprintf "%s%d:%0.2d:%0.2d" sign hours minutes seconds
-      else Printf.sprintf "%s%0.2d:%0.2d" sign minutes seconds
+      then Printf.sprintf "%s%dh%0.2dm%0.2ds" sign hours minutes seconds
+      else Printf.sprintf "%s%0.2dm%0.2ds" sign minutes seconds
 
     let of_secs = Fn.id
     let to_secs = Fn.id
