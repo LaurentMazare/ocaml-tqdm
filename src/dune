@@ -1,0 +1,5 @@
+(library
+  (name tqdm)
+  (public_name tqdm)
+  (libraries base stdio)
+)
