@@ -11,3 +11,7 @@ T.with_bar 100 ~f:(fun tqdm ->
     T.update tqdm v
 done);
 ```
+
+![][Screenshot]
+
+  [Screenshot]: https://raw.githubusercontent.com/LaurentMazare/ocaml-tqdm/master/images/utop.gif
