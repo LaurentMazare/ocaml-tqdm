@@ -2,7 +2,9 @@
 __ocaml-tqdm__ is a progress bar library for OCaml. The implementation is
 based on [Python tqdm library](https://tqdm.github.io).
 
-Below is an example of how to use this library:
+The package can easily be installed via opam, `opam install tqdm`.
+
+Below is an example of how to use it:
 ```ocaml
 module T = Tqdm.Tqdm
 T.with_bar 100 ~f:(fun tqdm ->
