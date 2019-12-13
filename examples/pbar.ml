@@ -8,6 +8,11 @@ let () =
         Unix.sleepf 0.1;
         T.update tqdm v
       done);
+  Tqdm.Fast.with_bar 100 ~f:(fun bar ->
+      for v = 1 to 100 do
+        Unix.sleepf 0.1;
+        Tqdm.Fast.update bar v
+      done);
   List.iter [ T.Style.Ascii; Line; Circle; Braille; Vertical ] ~f:(fun style ->
       T.with_bar ~options:{ T.Options.default with style } 100 ~f:(fun tqdm ->
           for v = 1 to 100 do
